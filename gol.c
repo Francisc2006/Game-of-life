@@ -28,7 +28,7 @@ void creare_mat_vec(char** mat, int** mat_vec, int n, int m)
                     }
                 }
             }
-            mat_vec[i][j] = nr_vecini; //initializare element matrice cu numarul de vecnin vii
+            mat_vec[i][j] = nr_vecini; //initializare element matrice cu numarul de vecini vii
         }
     }
 
