@@ -1,5 +1,5 @@
 build:
-	gcc gol.c -o gol
+	gcc gol.c functii_uzuale.c tasks.c f_stive+liste.c -o gol
 run:
 	./gol $(ARGS)
 clean:
