@@ -62,6 +62,15 @@ void afisare_matrice(char** mat, int n, int m, FILE* fout)
     fprintf(fout, "\n");
 }
 
+void copiere_matrice(char **mat_copy, char** mat, int n, int m){
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            mat_copy[i][j] = mat[i][j];
+        }
+    }
+
+}
+
 
 void eliberare_mat_int(int** mat, int n) {
     for (int i = 0; i < n; i++)
