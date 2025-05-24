@@ -48,6 +48,9 @@ int main(int argc, const char* argv[])
     else if (t == 3) {
         task_3(fin, fout, mat, mat_vec, n, m ,k);
     }
+    else if (t == 4) {
+        task_4(fin, fout, mat, mat_vec, n, m ,k);
+    }
 
     // eliberare spatiu de memorie
     eliberare_mat_char(mat, n);
