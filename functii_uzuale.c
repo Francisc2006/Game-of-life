@@ -87,3 +87,5 @@ void eliberare_mat_char(char** mat, int n) {
     }
     free(mat);
 }
+
+
