@@ -1,7 +1,7 @@
 #include "tasks.h"
 #include "functii_uzuale.h"
-#include "f_stive+liste+arbori.h"
-//#include "f_arbori.h"
+#include "f_structuri.h"
+
 
 void task_1(FILE* fin, FILE* fout, char** mat, int** mat_vec, int n, int m, int k) {
     afisare_matrice(mat, n, m, fout);
@@ -59,7 +59,8 @@ void task_2(FILE* fin, FILE* fout, char** mat, int** mat_vec, int n, int m, int 
                 }
             }
         }
-        push(&stackTop, head);
+        Node_list* copie = copieLista(head);
+        push(&stackTop, copie);
         deleteList(&head);
     }
 

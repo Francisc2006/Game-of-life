@@ -39,6 +39,7 @@ void printStack(Node_stack* top, FILE* fout);
 //liste
 void addAtEnd(Node_list** head, int l, int c);
 void printList(Node_list* head, FILE* fout);
+Node_list* copieLista(Node_list* head);
 void deleteList(Node_list **head);
 
 //arbori

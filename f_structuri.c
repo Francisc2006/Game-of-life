@@ -1,4 +1,4 @@
-#include "f_stive+liste+arbori.h"
+#include "f_structuri.h"
 #include "functii_uzuale.h"
 
 void push(Node_stack** top, Data *v) {
@@ -42,6 +42,18 @@ void deleteStack(Node_stack** top) {
     }
 }
 
+Node_list* copieLista(Node_list* head) {
+    Node_list* noua_lista = NULL;
+    Node_list* p = head;
+
+    while (p != NULL) {
+        addAtEnd(&noua_lista, p->l, p->c);
+        p = p->next;
+    }
+
+    return noua_lista;
+}
+
 void printList(Node_list* head, FILE* fout) { 
     while (head != NULL) {
         fprintf(fout, " %d %d", head->l, head->c);
@@ -66,6 +78,7 @@ void addAtEnd(Node_list** head, int l, int c) {
     newNode->c = c;
     if (*head == NULL) {
         *head = newNode;
+        newNode->next = NULL;
     }
     else {
         while (aux->next != NULL) {
@@ -106,7 +119,7 @@ void make_b_tree(Node_tree **root,  char **mat, int **mat_vec, int n, int m, int
         }
     }
 
-    (*root)->val = head;
+    (*root)->val = copieLista(head);
     deleteList(&head);
 
     char** mat_copy = (char**)malloc(n * sizeof(char*));
@@ -160,7 +173,7 @@ void make_org_tree(Node_tree **root,  char **mat, int **mat_vec, int n, int m, i
         }
     }
 
-    (*root)->val = head;
+    (*root)->val = copieLista(head);
     deleteList(&head);
 
     char** mat_copy = (char**)malloc(n * sizeof(char*));
@@ -200,7 +213,7 @@ void preorder(Node_tree *root, char **mat, int **mat_vec, int n, int m, int inde
             }
 
         }
-        deleteList(&head);
+        //deleteList(&head);
 
         if (task == 3) {
             afisare_matrice(mat, n, m, fout);
@@ -276,144 +289,143 @@ int hamPath(Graph g, int pos, int *component, int nr_noduri, int *path, int *vis
 
 //task 4
 void rezolva_t4(char **mat, int **mat_vec, int n, int m, FILE* fout) {
-            Graph g;
-            int nr_noduri = 0, suma_grade = 0;
+    Graph g;
+    int nr_noduri = 0, suma_grade = 0;
 
-            int** mat_graph = (int**)malloc(n * sizeof(int*)); //matricea care contine nodurile grafului
-            for (int i = 0; i < n; i++)
-            {
-                mat_graph[i] = (int*)malloc(m * sizeof(int));
+    int** mat_graph = (int**)malloc(n * sizeof(int*)); //matricea care contine nodurile grafului
+    for (int i = 0; i < n; i++)
+    {
+        mat_graph[i] = (int*)malloc(m * sizeof(int));
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            mat_graph[i][j] = -1;
+        }
+    }
+
+    creare_mat_vec(mat, mat_vec, n, m);
+
+    for (int i = 0; i < n; i ++) {
+        for (int j = 0; j < m; j++) {
+            if (mat[i][j] == 'X') {
+                suma_grade = suma_grade + mat_vec[i][j];
+                mat_graph[i][j] = nr_noduri;
+                nr_noduri++;
             }
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                    mat_graph[i][j] = -1;
-                }
+        }
+    }
+
+    g.V = nr_noduri;
+    g.E = suma_grade / 2;
+
+    //declarare celule din grafic
+    Cell celula[g.V];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (mat_graph[i][j] != -1) {
+                celula[mat_graph[i][j]].lin = i;
+                celula[mat_graph[i][j]].col = j;
             }
+        }
+    }
 
-            creare_mat_vec(mat, mat_vec, n, m);
+    g.a = (int**)malloc((g.V) * sizeof(int*));
+    for (int i = 0; i < g.V; i++)
+    {
+        g.a[i] = (int*)malloc((g.V) * sizeof(int));
+    }
 
-            for (int i = 0; i < n; i ++) {
-                for (int j = 0; j < m; j++) {
-                    if (mat[i][j] == 'X') {
-                        suma_grade = suma_grade + mat_vec[i][j];
-                        mat_graph[i][j] = nr_noduri;
-                        nr_noduri++;
-                    }
-                }
-            }
-
-            g.V = nr_noduri;
-            g.E = suma_grade / 2;
-
-            //declarare celule din grafic
-            Cell celula[g.V];
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                    if (mat_graph[i][j] != -1) {
-                        celula[mat_graph[i][j]].lin = i;
-                        celula[mat_graph[i][j]].col = j;
-                    }
-                }
-            }
-
-            g.a = (int**)malloc((g.V) * sizeof(int*));
-            for (int i = 0; i < g.V; i++)
-            {
-                g.a[i] = (int*)malloc((g.V) * sizeof(int));
-            }
-
-            //construire matrice de adiacenta
-            const int directie_i[8] = {-1, -1, -1, 0, 0, 1, 1, 1}; //vectori cu directiile vecinilor pentu linii
-            const int directie_j[8] = {-1, 0, 1, -1, 1, -1, 0, 1}; //vectori cu directiile vecinilor pentu coloane
-            int lin, col;
-            int nr_directii = 8;
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                    if (mat_graph[i][j] != -1) {
-                        for (int p = 0 ; p < nr_directii; p++)
+    //construire matrice de adiacenta
+    const int directie_i[8] = {-1, -1, -1, 0, 0, 1, 1, 1}; //vectori cu directiile vecinilor pentu linii
+    const int directie_j[8] = {-1, 0, 1, -1, 1, -1, 0, 1}; //vectori cu directiile vecinilor pentu coloane
+    int lin, col;
+    int nr_directii = 8;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (mat_graph[i][j] != -1) {
+                for (int p = 0 ; p < nr_directii; p++)
+                {
+                    lin = i + directie_i[p];
+                    col = j + directie_j[p];
+                    if (lin >= 0 && lin <n && col >=0 && col < m)
+                    {
+                        if (mat[lin][col] == 'X')
                         {
-                            lin = i + directie_i[p];
-                            col = j + directie_j[p];
-                            if (lin >= 0 && lin <n && col >=0 && col < m)
-                            {
-                                if (mat[lin][col] == 'X')
-                                {
-                                    g.a[mat_graph[i][j]][mat_graph[lin][col]] = 1;
-                                    g.a[mat_graph[lin][col]][mat_graph[i][j]] = 1;
-                                }
-                            }
+                            g.a[mat_graph[i][j]][mat_graph[lin][col]] = 1;
+                            g.a[mat_graph[lin][col]][mat_graph[i][j]] = 1;
                         }
                     }
-
                 }
             }
 
-            //determinare componente conexe;
-            int comp[g.V], nr_comp_conexe = 0;
-            for (int i = 0; i < g.V; i++) comp[i] = 0;
-            DFS(&g, comp, &nr_comp_conexe);
+        }
+    }
 
-            int max_length = -1;
-            int max_path[g.V];
-            //determinare componenta curenta
-            for (int l = 1; l <= nr_comp_conexe; l++) {
-                int crt_component[g.V];
-                int nr_noduri = 0; //numarul de noduri din fiecare componenta
-                for (int i = 0; i < g.V; i++) {
-                    if (comp[i] == l) {
-                        crt_component[nr_noduri] = i;
-                        nr_noduri++;
-                    }
-                }
-                
-                //cautare lant hamiltonian pentru feicare componenta
-                int path[nr_noduri], visited[g.V];
-                for (int j = 0; j < nr_noduri; j++) {
-                    path[j] = -1;
-                }
-                for (int j = 0; j < g.V; j++) {
-                    visited[j] = 0;
-                }
+    //determinare componente conexe;
+    int comp[g.V], nr_comp_conexe = 0;
+    for (int i = 0; i < g.V; i++) comp[i] = 0;
+    DFS(&g, comp, &nr_comp_conexe);
 
-                path[0] = crt_component[0]; //adaugam primul nod in path
+    int max_length = -1;
+    int max_path[g.V];
+    //determinare componenta curenta
+    for (int l = 1; l <= nr_comp_conexe; l++) {
+        int crt_component[g.V];
+        int nr_noduri = 0; //numarul de noduri din fiecare componenta
+        for (int i = 0; i < g.V; i++) {
+            if (comp[i] == l) {
+                crt_component[nr_noduri] = i;
+                nr_noduri++;
+            }
+        }
+        
+        //cautare lant hamiltonian pentru feicare componenta
+        int path[nr_noduri], visited[g.V];
+        for (int j = 0; j < nr_noduri; j++) {
+            path[j] = -1;
+        }
+        for (int j = 0; j < g.V; j++) {
+            visited[j] = 0;
+        }
+
+        path[0] = crt_component[0]; //adaugam primul nod in path
+        visited[path[0]] = 1;
+        int ok = hamPath(g, 1, crt_component, nr_noduri, path, visited);
+
+        if (ok == 1) { //daca lantul incepe cu primul nod (majoritatea cazurilor)
+            if (nr_noduri > max_length) {
+                max_length = nr_noduri;
+                for (int i = 0; i < nr_noduri; i ++) max_path[i] = path[i];
+            }
+        }
+        else { //daca nu ...
+            visited[path[0]] = 0;
+            for (int j = 1; j < nr_noduri; j++) {
+                path[0] = crt_component[j];
                 visited[path[0]] = 1;
-                int ok = hamPath(g, 1, crt_component, nr_noduri, path, visited);
-
-                if (ok == 1) { //daca lantul incepe cu primul nod (majoritatea cazurilor)
-                    if (nr_noduri > max_length) {
-                        max_length = nr_noduri;
-                        for (int i = 0; i < nr_noduri; i ++) max_path[i] = path[i];
-                    }
+                ok =  hamPath(g, 1, crt_component, nr_noduri, path, visited);
+                if (ok == 1 && nr_noduri > max_length) {
+                    max_length = nr_noduri;
+                    for (int i = 0; i < nr_noduri; i ++) max_path[i] = path[i];
                 }
-                else { //daca nu ...
-                    visited[path[0]] = 0;
-                    for (int j = 1; j < nr_noduri; j++) {
-                        path[0] = crt_component[j];
-                        visited[path[0]] = 1;
-                        ok =  hamPath(g, 1, crt_component, nr_noduri, path, visited);
-                        if (ok == 1 && nr_noduri > max_length) {
-                            max_length = nr_noduri;
-                            for (int i = 0; i < nr_noduri; i ++) max_path[i] = path[i];
-                        }
-                        visited[path[0]] = 0;
-                    }
-                }
+                visited[path[0]] = 0;
             }
+        }
+    }
 
-            if (max_length != -1) {
-                fprintf(fout, "%d\n", max_length - 1);
-                for (int i = 0; i < max_length; i++) {
-                    fprintf(fout, "(%d,%d)", celula[max_path[i]].lin, celula[max_path[i]].col);
-                    if (i != max_length - 1) fprintf(fout, " ");
-                }
-                fprintf(fout, "\n");
-            }
-            else {
-                fprintf(fout, "-1\n");
-            }
+    if (max_length != -1) {
+        fprintf(fout, "%d\n", max_length - 1);
+        for (int i = 0; i < max_length; i++) {
+            fprintf(fout, "(%d,%d)", celula[max_path[i]].lin, celula[max_path[i]].col);
+            if (i != max_length - 1) fprintf(fout, " ");
+        }
+        fprintf(fout, "\n");
+    }
+    else {
+        fprintf(fout, "-1\n");
+    }
 
-            eliberare_mat_int(mat_vec, n);
-            eliberare_mat_int(g.a, g.V);
-            eliberare_mat_int(mat_graph, n);
+    eliberare_mat_int(g.a, g.V);
+    eliberare_mat_int(mat_graph, n);
 }
 
