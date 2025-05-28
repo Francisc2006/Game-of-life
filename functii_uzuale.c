@@ -42,7 +42,7 @@ void citire_matrice(char** mat, int n, int m, FILE* fin)
             {
                 c = getc(fin);
             }
-            while (c == '\n');
+            while (c == '\n' || c == '\r' || c == ' ' || c == '\t');
             mat[i][j] = c;
         }
     }
